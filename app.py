@@ -1,5 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash
+from flask import Flask, render_template, redirect, url_for, request, session, flash,jsonify
 from flask_sqlalchemy import SQLAlchemy
+from datetime import timedelta
+
 app= Flask(__name__)
 app.secret_key='lol'
 
@@ -10,15 +12,30 @@ class users(db.Model):
     _id= db.Column("id",db.Integer, primary_key=True)
     name=db.Column(db.String(100),nullable=False)
 
-    def __init__(self,name,email):
+    def __init__(self,name):
         self.name=name
-        self.email=email
 
 
 app.permanent_session_lifetime =  timedelta(days=2)
-@app.route('/')
+@app.route('/',methods= ['GET','POST'])
 def home():
-    return render_template('index.html')
+        if"username" in session:
+            return redirect(url_for(''))
+        if request.method=='POST':
+            username=request.form['user']
+            new_user=users(name=username)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('home'))
+        return render_template('index.html')
+
+@app.route('/names')
+def names():
+    json_array=[]
+    for item in users.query.all():
+            json_array.append({"name":str(item.name)})
+            kaka=jsonify(json_array)
+    return kaka
 
 
 

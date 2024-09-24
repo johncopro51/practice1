@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+
+</head>
+<body>
+
+<a>
+    Hi
+</a>
+<form method="POST">
+    <input id="user" name="user" >
+</form>
+<button onclick="dowork()">see users</button> 
+
+    
+</body>
+
+
+<script>
+    function dowork(){
+    fetch( '/names' )
+    .then(response => response.json())
+    .then(data=>display(data));
+    
+    
+    }
+    function display(data){
+        console.log(data)
+}
+
+</script>
