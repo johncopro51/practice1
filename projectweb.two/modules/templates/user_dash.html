@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'main.css') }}">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  
+</head>
+<body  >
+
+
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ">
+          <a class="navbar-brand" href="/">🦂</a>
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <div class="postclick" onclick="show_user_menu()">             
+                <img   src='data:image/png;base64,{{current_user.rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+              </div>
+            </li>
+            <li class="nav-item">
+              <div class="postclick" onclick="show_user_menu()"style="margin-top:1%; height:100%;" >
+              <strong>{{current_user.username}} </strong>
+              </div>
+            </li>
+            <li class="nav-item" style="margin-left: 15px;">
+              <div class="postclick" onclick="location.href='/chat_dash'" style="margin-top:1%;margin-left:1%; height:100%;" >
+              <strong>      <i class="bi bi-chat"></i>
+              </strong>
+              </div>
+            </li>
+            
+          </ul>
+
+          <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+                <form method="post">
+                    <input type="search" name="search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit"style="margin: right 10px;">Search</button>
+                </form>
+          </div>
+        </nav>
+        <div style="margin-left: 40px;" id="user_menu" class="dissapear">
+          <ul class="list-group sort_list" >
+            <li class="list-group-item link_click" onclick="location.href='/logout'">log out</li>
+            
+            <li class="list-group-item link_click"onclick="location.href='/profile/{{current_user.username}}'">edit profile</li>
+            <li class="list-group-item link_click"onclick="location.href='/post'" >New Post</li>
+
+          </ul>
+        </div>
+
+
+        <div class="container-fluid justify-content-center">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 "style="padding:-14.5rem;align-items-center; ">
+              {%if field!="active"%}
+              <a class="btn btn-dark"onclick="show_sort()" style="margin-left: 1px;">Sort</a>
+              {%endif%}
+            <div class="collapse navbar-collapse" id="navbarText">
+              <ul class="navbar-nav mr-auto" style="margin-left: 35%;">
+                <li class="nav-item active">
+                  <form method="post"id="my_post">
+                    <input type="hidden"  name="mypost">
+                    <a class="navbar-brand link_click" onclick="submit_form('my_post')">My Post</a>
+                </form> 
+                </li>
+                <li class="nav-item active">
+                  <form method="post"id="my_follow">
+                    <input type="hidden"  name="follow">
+                    <a class="navbar-brand link_click" onclick="submit_form('my_follow')">Following</a>
+                </form> 
+                </li>
+                <li class="nav-item">
+                  <form method="post"id="get_active">
+                    <input type="hidden"  name="active">
+                    <a class="navbar-brand link_click" onclick="submit_form('get_active')">Active</a>
+                </form> 
+                </li>
+                <li class="nav-item">
+                  <form method="post"id="get_new">
+                    <input type="hidden"  name="new">
+                    <a class="navbar-brand link_click" onclick="submit_form('get_new')">NEW</a>
+                </form> 
+                </li>
+
+                <li class="nav-item">
+                  <form method="post"id="get_like">
+                    <input type="hidden"  name="liked">
+                    <a class="navbar-brand link_click" onclick="submit_form('get_like')">liked</a>
+                </form> 
+                </li>
+
+                <li class="nav-item">
+                  <form method="post"id="get_top">
+                      <input type="hidden"  name="top">
+                      <a class="navbar-brand link_click" onclick="submit_form('get_top')">TOP</a>
+                  </form> 
+              </li>
+              </ul>
+            </div>
+          </nav>
+          <div id="sort_list" class="sort_list dissapear">
+            <ul class="list-group">
+              <li class="nav-item">
+                <form method="post"id="1_days">
+
+                    <input type="hidden" value="1 , {{field}}"  name="days">
+                    <a class="list-group-item link_click" onclick="submit_form('1_days')">Today</a>
+                </form> 
+             </li>
+              <li class="nav-item">
+                <form method="post"id="7_days">
+
+                    <input type="hidden" value="7 , {{field}}"  name="days">
+                    <a class="list-group-item link_click" onclick="submit_form('7_days')">7 Days</a>
+                </form> 
+            </li>
+            <li class="nav-item">
+              <form method="post"id="30_days">
+                  <input type="hidden" value="32 , {{field}}"  name="days">
+                  <a class="list-group-item link_click" onclick="submit_form('30_days')"> Month</a>
+              </form> 
+          </li>
+          <li class="nav-item">
+            <form method="post"id="365_days">
+                <input type="hidden" value="365 , {{field}}"  name="days">
+                <a class="list-group-item link_click" onclick="submit_form('365_days')">year</a>
+            </form> 
+        </li>
+            </ul>
+          </div>
+        </div>
+          <div style="padding-left: 5%;padding-right: 5%;">
+            <div class="sort_button" onclick="show_sort()" >
+              
+              </div>
+
+            </div>
+            <div>
+
+            <div class="post_container">
+            {%for item in post%}
+
+            <div class="card bg-dark text-white" style="margin-top: 10px;">
+              {% if post|length %}
+              <div class="container-fluid d-flex justify-content-start">
+                  <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 "><img   src='data:image/png;base64,{{Author[loop.index0].rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+                  <strong>{{Author[loop.index0].username}} </strong>
+                </nav>
+                </div>
+                {%endif%}
+
+                <div class="postclick" onclick="location.href='/comment/{{item.id}}'">
+
+              {%if item.rendered_data!=0%}
+                <img   src='data:image/png;base64,{{ item.rendered_data }}'style="width:auto;"  class="rounded mx-auto d-block img-fluid" alt="">
+                    {%if item.type=="video"%}
+                    <div class="h-100 d-flex align-items-center justify-content-center">
+                    <video style="border-radius: 1%;" width="400"alt=""src='data:image/png;base64,{{ item.rendered_data }}' controls>
+
+                    </video>
+                  </div>
+
+                    {%endif%}
+              {%endif%}
+                <div class="card-body">
+                  <h5 class="card-title">{{item.title}}</h5>
+                  <p class="card-text">{{item.note}}</p>
+                </div>   
+
+                </div>
+                <div>
+                    {%if item.id in User_liked_id%}
+                    <button value="{{item.id}}" class="like" type="button"style="color: black;">
+                    ❤️: {{item.num_likes}}	
+                    </button>
+                    {%else%}
+                    <button value="{{item.id}}"class="" style="color: black;">
+                      🖤: {{item.num_likes}}	
+                    </button>
+                    {%endif%}
+                  </div>  
+              </div>
+          {%endfor%}
+
+        </div>
+          </div>
+
+<script>
+  function show_sort(){
+    $("#sort_list").toggleClass("dissapear"); 
+
+     }
+</script>
+<script>
+function show_user_menu(){
+    $("#user_menu").toggleClass("dissapear"); 
+  }
+</script>
+
+
+
+
+
+
+<script>
+  $("button").click(function() {
+    var like_button = $(this).val();
+    var myClass = this.className;
+    var a=this.innerText
+    a=a.replace(/\D/g, "");
+    g=parseInt(a)+1
+    d=parseInt(a)-1
+
+      if (this.className=="like"){
+            this.innerText='🖤: '+d
+          }
+      if (this.className==""){
+            this.innerText='❤️: '+g
+          }
+          
+          
+  $.ajax({
+                  type: "POST",
+                  url: "{{post.id}}",
+                  data: {'like':like_button}
+    });
+          
+    this.classList.toggle('like');    
+          
+              
+            
+          
+          }); 
+</script>
+
+<script>
+
+  function submit_form(val)
+  {
+      document.getElementById(val).submit(); 
+  }
+  </script>
+          
+
+</body>

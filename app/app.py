@@ -2,32 +2,27 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 import socket
-from flask_redis import FlaskRedis
-
 
 app= Flask(__name__)
-redis_client = FlaskRedis(app)
 app.secret_key='lol'
 
-app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///salaries.db"
-app.config["SQALCHEMY_TRACK_MODIFICATIONS"]=False
+app.config['SQLALCHEMY_DATABASE_URI']= "postgresql://root:root@postgresql-master:5432/test_db1"
 db = SQLAlchemy(app)
-class users(db.Model):
-    _id= db.Column("id",db.Integer, primary_key=True)
-    name=db.Column(db.String(100),nullable=False)
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username= db.Column(db.String,nullable=False,unique=False)
 
-    def __init__(self,name):
-        self.name=name
 
 
 app.permanent_session_lifetime =  timedelta(days=2)
+
 @app.route('/',methods= ['GET','POST'])
 def home():
         if"username" in session:
             return redirect(url_for(''))
         if request.method=='POST':
             username=request.form['user']
-            new_user=users(name=username)
+            new_user=User(username=username)
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('home'))
@@ -36,8 +31,8 @@ def home():
 @app.route('/names')
 def names():
     json_array=[]
-    for item in users.query.all():
-            json_array.append({"name":str(item.name)})
+    for item in User.query.all():
+            json_array.append({"name":str(item.username)})
             kaka=jsonify(json_array)
     return kaka
 

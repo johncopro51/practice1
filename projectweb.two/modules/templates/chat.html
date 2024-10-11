@@ -1,0 +1,211 @@
+
+<html>
+    <head>
+    <title>dm</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'main.css') }}">
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    
+    </head>
+    <body style="background: #212529">
+        <script type="text/javascript" charset="utf-8">
+            var socket =io.connect(null, {port: 5000, rememberTransport: false});
+            socket.on('connect',function(){
+                socket.emit('join',{room:'{{rn}}'});
+            });
+            
+function get_data(rn){
+    event.preventDefault();
+    rn=parseInt(rn)
+    var g=document.getElementById("message").value;
+    socket.emit('send_message',{data:g,room:rn});
+    document.getElementById("message").value='';
+
+    }
+
+
+socket.on('my_response',function(data){
+
+        var div = document.getElementById("new_comment_holder");
+        var last_child = div.lastElementChild 
+
+        
+
+        group=document.createElement('div');
+        card=document.createElement('div');
+        header=document.createElement('div')
+        nav=document.createElement('nav')
+        img=document.createElement('img')
+        username=document.createElement('strong')
+        card_body=document.createElement('div')
+        body=document.createElement('p')
+
+            username.innerText=(data.username)
+
+            group.className=(data.username)
+            card_body.className=('card-body')
+            img.src=('data:image/png;base64,'+data.pf_pic)
+            nav.className=("navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ")
+            header.className=('container-fluid d-flex justify-content-start')
+            card.className=('card bg-dark text-white');
+            body.className=('card-text')
+
+                img.className=('rounded-circle me-2 rounded mx-auto d-block')
+                img.style=('border-radius: 50%;')
+                img.width=('32')
+                img.height=('32')
+
+
+            body.innerText=data.message
+
+
+
+            div.appendChild(group)
+            group.appendChild(card)
+        if(last_child==null){
+            card.appendChild(header)
+            header.appendChild(nav)
+            nav.appendChild(img)
+            nav.appendChild(username)
+            card.appendChild(card_body)
+            card_body.appendChild(body)
+        }
+        if(last_child.className==data.username){
+            card.appendChild(card_body)
+            card_body.appendChild(body)
+            }
+
+        else{
+            card.appendChild(header)
+            header.appendChild(nav)
+            nav.appendChild(img)
+            nav.appendChild(username)
+            card.appendChild(card_body)
+            card_body.appendChild(body)
+
+            }
+            load()
+            updateScroll()
+
+
+
+
+            })
+            
+</script>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ">
+    <a class="navbar-brand" href="/">🦂</a>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <div class="postclick" onclick="show_user_menu()">             
+          <img   src='data:image/png;base64,{{current_user.rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+        </div>
+      </li>
+      <li class="nav-item">
+        <div class="postclick" onclick="show_user_menu()"style="margin-top:1%; height:100%;" >
+        <strong>{{current_user.username}} </strong>
+        </div>
+      </li>
+      
+      
+    </ul>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+          <form method="post">
+              <input type="search" name="search">
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit"style="margin: right 10px;">Search</button>
+          </form>
+    </div>
+  </nav>
+  <div style="margin-left: 40px;" id="user_menu" class="dissapear">
+    <ul class="list-group sort_list" >
+        <li class="list-group-item link_click" onclick="location.href='/logout'">log out</li>
+            
+        <li class="list-group-item link_click"onclick="location.href='/profile/{{current_user.username}}'">edit profile</li>
+        <li class="list-group-item link_click"onclick="location.href='/post'" >New Post</li>
+
+    </ul>
+  </div>
+
+<div class="post_container bg-dark"    >
+                <div id="new_comment_holder"class=" bg-dark container-fluid chat_container" style="height: 80%;overflow: auto; ">
+                    {%if Messages|length%}
+                        {%for item in Messages%}
+                        {%if Messages[loop.index0-1].date!=item.date%}
+                        <p style="color: azure;">{{item.date}} </p>
+                        {%endif%}
+
+                        <div class="{{item.username}}">
+
+                        <div class="card bg-dark text-white"style='max-width: 70%; border:none;'>
+                            {%if Messages|length%}
+                                {%if Authors[loop.index0-1].username!=Authors[loop.index0].username%}
+                                <div class="container-fluid d-flex justify-content-start">
+
+                                    <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ">
+                                        <img   src='data:image/png;base64,{{Authors[loop.index0].rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+                                        <div class="postclick" onclick="location.href='/profile/{{Authors[loop.index0].username}}'">
+                                            <strong>{{Authors[loop.index0].username}} </strong>
+                                        </div>
+                                    </nav>
+                            </div>
+                            {%elif loop.first %}
+                                <div class="container-fluid d-flex justify-content-start">
+
+                                    <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ">
+                                        <img   src='data:image/png;base64,{{Authors[loop.index0].rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+                                        <div class="postclick" onclick="location.href='/profile/{{Authors[loop.index0].username}}'">
+                                            <strong>{{Authors[loop.index0].username}} </strong>
+                                        </div>
+                                    </nav>
+                            </div>
+
+                                {%endif%}
+                            {%endif%}
+                                            <div class="card-body">
+                                                <p class="card-text">
+                                                    {{item.message}}
+                                                </p>
+                                            </div>
+                            </div>
+                        </div>
+                        {%endfor%}
+                    {%endif%}
+
+                </div>
+                <form onsubmit="get_data('{{rn}}')">
+                    <div class="form-group mx-sm-3 mb-2">
+                        <input  class="form-control" id="message" style="width: 88%; float: left;">
+                        <button type="submit"style="float:right;"class="btn btn-primary mb-2">SEND</button>
+                      </div>
+                </form>
+
+        </div>
+
+    <script>
+function load(){
+    window.scroll(0, document.documentElement.scrollHeight)
+    }
+    history.scrollRestoration = "manual";
+    window.onload = load;
+</script>
+
+<script>
+        function updateScroll(){
+    var element = document.getElementById("new_comment_holder");
+    element.scrollTop = element.scrollHeight;
+    }    window.onload = updateScroll;
+
+    </script>
+    
+<script>
+    function show_user_menu(){
+      $("#user_menu").toggleClass("dissapear"); 
+    }
+    </script>
+
+</body>

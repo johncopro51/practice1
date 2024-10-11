@@ -1,0 +1,365 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'mainpost.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <script src="{{ url_for('static', filename= 'main_post.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  
+  </head>
+  <body style="width: 100%;">
+
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ">
+      <a class="navbar-brand" href="/">🦂</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <div class="postclick" onclick="show_user_menu()">             
+            <img   src='data:image/png;base64,{{user.rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="postclick" onclick="show_user_menu()"style="margin-top:1%; height:100%;" >
+          <strong>{{user.username}} </strong>
+          </div>
+        </li>
+        
+      </ul>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+            <form method="post">
+                <input type="search" name="search"minlength='1' maxlength="150">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit"style="margin: right 10px;">Search</button>
+            </form>
+      </div>
+    </nav>
+    <div style="margin-left: 40px;" id="user_menu" class="dissapear">
+      <ul class="list-group sort_list" >
+        <li class="list-group-item" onclick="location.href='/logout'">log out</li>
+        
+        <li class="list-group-item"onclick="location.href='/profile/{{user.username}}'">edit profile</li>
+        <li class="list-group-item"onclick="location.href='/post'" >New Post</li>
+      </ul>
+    </div>
+  
+  
+  
+  
+          <div class="card bg-dark text-white"style="width:100%;">
+            <div class="container-fluid d-flex justify-content-start">
+
+              <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ">
+                <img src='data:image/png;base64,{{Author.rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+                    <div class="postclick" onclick="location.href='/profile/{{Author.username}}'">
+                      <strong>{{Author.username}} </strong>
+                    </div>
+
+              </nav>
+            </div>
+
+            {%if post.rendered_data!=0%}
+            <img   src='data:image/png;base64,{{ post.rendered_data }}'class="img-fluid"style="width: 100% " alt="">
+            {%endif%}
+            <div class="card-body">
+                    <h5 class="card-title">{{post.title}} </h5>
+                        <p class="card-text">{{post.note}}</p>
+                <div>
+                  {%if post.id in User_liked_id%}
+                          <button value="{{post.id}}" class="like" type="button"style="color: white;">
+                          ❤️: {{post.num_likes}}	
+                          </button>
+                  {%else%}
+                          <button value="{{post.id}}"class="" style="color: white;">
+                            🖤: {{post.num_likes}}	
+                            </button>
+
+                  {%endif%}
+                  <a class="btn btn-dark"style="float:right; color:white;" onclick="show_comment()" >REPLY</a>
+
+                </div>
+                <div class="form-group dissapear"id="show_comment">
+                  <form method="post" onsubmit="get_data(event)">
+                            <textarea name='c'class="form-control" id="comment" rows="3"minlength='1' maxlength="150" ></textarea>
+                            <input type="submit" value="submit" class="btn btn-dark">
+                  </form>
+                </div>
+            </div>   
+          </div>
+          <div class="container-fluid justify-content-center">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 "style="padding:-14.5rem;align-items-center; ">
+                <div class="collapse navbar-collapse" id="navbarText">
+                  <ul class="navbar-nav mr-auto" style="margin-left: 40%;">
+                    <li class="nav-item">
+                      <form method="post"id="get_new">
+                        <input type="hidden"  name="new">
+                        <a class="navbar-brand" onclick="submit_form('get_new')">new</a>
+                    </form> 
+                    </li>
+    
+                    <li class="nav-item">
+                      <form method="post"id="get_active">
+                        <input type="hidden"  name="active">
+                        <a class="navbar-brand" onclick="submit_form('get_active')">Active</a>
+                    </form> 
+                    </li>
+    
+                    <li class="nav-item">
+                      <form method="post"id="get_top">
+                          <input type="hidden"  name="top">
+                          <a class="navbar-brand" onclick="submit_form('get_top')">TOP</a>
+                      </form> 
+                  </li>
+                  </ul>
+                </div>
+              </nav>
+        </div>
+        <div class="card bg-dark text-white">
+            <div id="new_comment_holder"style=" max-width: 70%;"id="para0">
+            </div>
+
+            <div id="refresh">
+            
+              {% for comment in comments %}
+              {%if comment.parent_id==None%}
+              <div id="reply_to{{comment.id}}" class="">
+                {%else%}
+              <div id="reply_to{{comment.id}}" class="{{comment.parent_id}} dissapear">
+                {%endif%}
+              
+                      <div id="div{{comment.level}}">
+                          <div class="card bg-dark text-white"style='max-width: 70%;'id='para{{comment.level}}'>
+                                  {% if comments|length %}
+                                      <div class="container-fluid d-flex justify-content-start">
+
+                                            <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ">
+                                                  <img   src='data:image/png;base64,{{Comment_Author[loop.index0].rendered_data}}'style="border-radius: 50%;"width="32"height="32"  class="rounded-circle me-2 rounded mx-auto d-block " alt="">
+                                                  <div class="postclick" onclick="location.href='/profile/{{Comment_Author[loop.index0].username}}'">
+                                                      <strong>{{Comment_Author[loop.index0].username}} </strong>
+                                                </div>
+                                                <a style="margin-left: 10%;" onclick="show_reply_field('{{comment.id}}')" class="btn btn-dark">Reply</a>
+
+                                            </nav>
+                                      </div>
+                                  {%endif%}
+                              <div class="card-body">
+                                    <p class="card-text">
+                                      {{comment.date}}
+                                    </p>
+                                    <p class="card-text">
+                                      {{comment.comment}}
+                                    </p>
+                                    <div>
+                                      {%if comment.id in User_liked_id%}
+                                          <button id="like{{comment.id}}" value="{{comment.id}}" type="button" class="like"style="float:right;">
+                                            ❤️: {{comment.num_likes}}	
+                                          </button>
+                                      {%else%}
+                                          <button value="{{comment.id}}" class=""style="float: right;">
+                                            🖤: {{comment.num_likes}}	
+                                          </button>
+                                      {%endif%}
+                                    </div>
+                                  {%if comment.has_children==True%}
+                                  <div class="child" type="button"onclick="refresh_box({{comment.id}});">
+                                  
+                                    <i class="bi bi-arrow-down-circle-fill"></i>   
+                                    {%endif%}
+                              </div>
+                              <div id="replyfield{{comment.id}}" class="dissapear"style="margin-top:30px;">
+                                <form method="post" onsubmit="reply_to(event,'{{comment.id}}','{{comment.level}}')">
+                                      <textarea name='reply'class="form-control" id="reply{{comment.id}}" rows="3" style="background-color: rgb(222, 224, 224);color: rgb(20, 19, 19);" ></textarea>
+                                  <input type="submit" value="reply">
+                                </form>                              
+                            </div>
+                          </div>
+                        </div>
+              </div>
+              </div>
+                {% endfor %}
+            </div>
+          </div>
+
+          </div>
+  
+        </div>
+          
+          
+      </div>
+    <d
+  
+
+
+  
+  
+  
+  <!-- sending reply to backennd wile creating a new reply on display ps this is  messy -->
+  <script>
+function reply_to(event,obj,level){
+  
+    event.preventDefault();
+    var reply = document.getElementById("reply"+obj).value;
+    document.getElementById("reply"+obj).value='';   
+    var a=level
+    a=a.replace(/\D/g, "");
+    a=parseInt(a)+1
+    $.ajax({
+            type: "POST",
+            url: "{{post.id}}",
+            data: {'reply':reply,'og':obj},
+            success: function(responseData, textStatus, jqXHR) {
+
+            var div = document.getElementById("reply_to"+obj);
+
+                        card_container=document.createElement('div');
+                        card=document.createElement('div');
+                        header=document.createElement('div')
+                        nav=document.createElement('nav')
+                        img=document.createElement('img')
+                        username=document.createElement('strong')
+                        card_body=document.createElement('div')
+                        body=document.createElement('p')
+
+                    username.innerText=('{{user.username}}')
+                    card_body.className=('card-body')
+                    img.src=('data:image/png;base64,{{user.rendered_data}}')
+                    nav.className=("navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ")
+                    header.className=('container-fluid d-flex justify-content-start')
+                    card.className=('card bg-dark text-white');
+
+                  body.className=('card-text')
+                  card.id=('para'+a)
+                  card_container.id=('div'+a)
+
+                img.className=('rounded-circle me-2 rounded mx-auto d-block')
+                img.style=('border-radius: 50%;')
+                img.width=('32')
+                img.height=('32')
+
+
+            body.innerText=reply
+
+          card_container.appendChild(card)
+          card.appendChild(header)
+          header.appendChild(nav)
+          nav.appendChild(img)
+          nav.appendChild(username)
+          card.appendChild(card_body)
+          card_body.appendChild(body)
+
+      div.parentNode.insertBefore(card_container, div.nextSibling);
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          console.log(errorThrown);
+      }
+  })
+
+}
+  </script>
+
+
+
+
+  <!-- sending comment to backennd wile creating a new comment on display ps this is messy-->
+
+  <script>
+function get_data(event){
+    event.preventDefault();
+    var comment = document.getElementById("comment").value;
+    document.getElementById("comment").value='';   
+
+    $.ajax({
+          type: "POST",
+          url: "{{post.id}}",
+          data: {'c':comment},
+          success: function(responseData, textStatus, jqXHR) {
+
+            var div = document.getElementById("new_comment_holder");
+
+                  card=document.createElement('div');
+                  header=document.createElement('div')
+                  nav=document.createElement('nav')
+                  img=document.createElement('img')
+                  username=document.createElement('strong')
+                  card_body=document.createElement('div')
+                  body=document.createElement('p')
+
+                username.innerText=('{{user.username}}')
+                card_body.className=('card-body')
+                img.src=('data:image/png;base64,{{user.rendered_data}}')
+                nav.className=("navbar navbar-expand-lg navbar-dark bg-dark text-white fs-6 ")
+                header.className=('container-fluid d-flex justify-content-start')
+                card.className=('card bg-dark text-white');
+                body.className=('card-text')
+                card.id=('para0')
+
+              img.className=('rounded-circle me-2 rounded mx-auto d-block')
+              img.style=('border-radius: 50%;')
+              img.width=('32')
+              img.height=('32')
+
+
+            body.innerText=comment
+
+          div.appendChild(card)
+          card.appendChild(header)
+          header.appendChild(nav)
+          nav.appendChild(img)
+          nav.appendChild(username)
+          card.appendChild(card_body)
+          card_body.appendChild(body)
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+        }
+    })
+
+}
+  </script>
+
+
+
+
+
+
+  <!-- liking -->
+  <script>
+    $("button").click(function() {
+var like_button = $(this).val();
+var myClass = this.className;
+var a=this.innerText
+      a=a.replace(/\D/g, "");
+      g=parseInt(a)+1
+      d=parseInt(a)-1
+if (this.className=="like"){
+    this.innerText='🖤: '+d
+    }
+if (this.className==""){
+    this.innerText='❤️: '+g
+    }
+
+
+$.ajax({
+            type: "POST",
+            url: "{{post.id}}",
+            data: {'like':like_button}
+      });
+
+this.classList.toggle('like');    
+
+}); 
+</script>
+  
+  <script>
+    function show_user_menu(){
+      $("#user_menu").toggleClass("dissapear"); 
+        }
+    </script>
+  
+  
+  
+  </body>
+  
