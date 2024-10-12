@@ -32,7 +32,6 @@ services:
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./modules/static:/usr/share/nginx/html/static  # Adjust this path
     depends_on:
       - app
     ports:

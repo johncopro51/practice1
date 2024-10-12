@@ -1,1 +1,0 @@
-postgresql://root:root@db:5432/test_db1
